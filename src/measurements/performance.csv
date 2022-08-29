@@ -1,0 +1,7 @@
+implementation,nodes,frametime
+basic,small,2.8
+dualstate,small,3.9
+dualstate-animated,small,3.9
+basic,large,26.6
+dualstate,large,37.7
+dualstate-animated,large,37.6
