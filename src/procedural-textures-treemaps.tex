@@ -70,6 +70,9 @@
 
 \usepackage{csquotes}
 
+\usepackage{eso-pic}
+\AddToShipoutPictureFG{\AtPageLowerLeft{\put(\LenToUnit{0.5\paperwidth},\LenToUnit{6mm}){\makebox[0pt][c]{\fontsize{6.5}{8}\selectfont\color{gray}Author's revised version (2026-11-10). Version of record: https://doi.org/10.1007/s12650-022-00874-3}}}}
+
 \begin{document}
 
 \title{Procedural Texture Patterns for Encoding Changes in Color in 2.5D Treemap Visualizations}
@@ -88,7 +91,7 @@ J{\"u}rgen D{\"o}llner, \email{juergen.doellner@hpi.uni-potsdam.de}
 \at Hasso Plattner Institute, Digital Engineering Faculty, University of Potsdam, Germany
 }
 
-\date{Received: \today~/~Accepted: \emph{tbd}}
+\date{Received: February 3, 2022~/~Accepted: August 19, 2022}
 
 \maketitle
 
@@ -114,14 +117,14 @@ J{\"u}rgen D{\"o}llner, \email{juergen.doellner@hpi.uni-potsdam.de}
         \spy on ($(fig1.center)+(-6.3mm, +10mm)$) in node at ($(fig1.north)+(+14mm,+6mm)$);
     \end{tikzpicture}
     \caption{%
-        Synthetic hierarchical test dataset with n revisions is depicted using a 2.5D treemap that supports transitioning between subsequent data revisions mapped to color and height. The two examples (a) and (b) show a combination of two procedural patterns used to animate transitions between revisions.}
+        Synthetic hierarchical test dataset with $n$ revisions is depicted using a 2.5D treemap that supports transitioning between subsequent data revisions mapped to color and height. The two examples (a) and (b) show a combination of two procedural patterns used to animate transitions between revisions.}
     \label{fig:teaser}
 \end{figure}
 
 Treemaps allow for the visualization of tree-structured data while supporting mappings to multiple visual variables, including size and color~\citep{johnson1991-spacefilling,carpendale2003-considering}.
 They are applied for visualization in domains such as business intelligence and software development and facilitate data observation over time~\citep{roberts2018-businessdata,caserta2011-staticaspects}.
 Treemaps can be used in static and interactive contexts, i.e., using static images or interactive clients to support interactive visual analytics tasks.
-In contrast to 2D treemaps, their embedding in the third dimension, so-called \emph{2.5D treemaps} or \emph{3D-embedded treemaps}, enable additional data mapping and facilitate a city-like metaphor often suggested for the depiction of software projects~\citep{wettel2008-evolution,schulz2011-implicit,limberger2019-softwaremaps}.
+In contrast to 2D treemaps, their embedding in the third dimension, so-called \emph{2.5D treemaps} or \emph{3D-embedded treemaps}, enables additional data mapping and facilitate a city-like metaphor often suggested for the depiction of software projects~\citep{wettel2008-evolution,schulz2011-implicit,limberger2019-softwaremaps}.
 Although different layouting shapes exist for treemaps~\citep{scheibel2020-treemaplayouts}, we focus on the widely used rectangular layouts, and, thus, rectangular 2.5D treemaps.
 
 In order to depict changes in time-varying data,
@@ -144,7 +147,7 @@ In summary, our main contributions are:
 \begin{itemize}
     \item the concept of procedural texture patterns that are suitable for mapping change in color in rectangular 2.5D treemaps,
     \item a catalog of seven specific patterns as examples to showcase the design space and the trade-off between characteristics,
-    \item an extension to include a secondary patterns for accurate display of change direction even for static display of an image,
+    \item an extension to include a secondary pattern for accurate display of change direction even for static display of an image,
     \item a detailed description of a prototypical GPU-based implementation with focus on memory layout of per-vertex data and the integration of the procedural textures in fragment shader calls, and
     \item an evaluation of the prototype with focus on performance impact compared to a rendering system without texture pattern capabilities, and two case studies on real-world software projects.
 \end{itemize}
@@ -152,8 +155,8 @@ In summary, our main contributions are:
 The remainder of this paper is structured as follows:
 Section~2 presents and discusses related work.
 Section~3 introduces procedural textures to extend the color mapping of 2.5D treemaps and a catalog of example patterns.
-Section~4 contains evaluation by means of a descriptions of our prototype, the case studies, and a discussion.
-Last, section~5 concludes this paper.
+Section~4 contains evaluation by means of a description of our prototype, the case studies, and a discussion.
+Last, Section~5 concludes this paper.
 
 \begin{figure}[tb] %
     \begin{tikzpicture}[figNS, spy using outlines = {style = spyRC, darkgray, magnification = 2.25, width = 24mm, height = 14mm}]
@@ -162,7 +165,7 @@ Last, section~5 concludes this paper.
         \node[figRC, anchor = north](fig1) at ([yshift = -\pfull] fig0.south) 
             {\includegraphics[width = \textwidth, trim = 2 2 2 2, clip]{figures/_jov-diff-classical-arrows}};
         \node[below left = 0 of fig0, labelSW](lab0){(a) Changes in height are color coded (and can be read from the top).};
-        \node[below left = 0 of fig1, labelSW](lab1){(b) Changes in height are indicated as down-ward or up-ward oriented arrows.};
+        \node[below left = 0 of fig1, labelSW](lab1){(b) Changes in height are indicated as downward or upward oriented arrows.};
         \spy on ($(fig0.center)+(-6mm, +9mm)$) in node at ($(fig0.center)+(+45.5mm,+8mm)$);
         \spy on ($(fig0.center)+(-22mm, +5mm)$) in node at ($(fig0.center)+(+45.5mm,-8mm)$);
         \spy on ($(fig1.center)+(-6mm, +9mm)$) in node at ($(fig1.center)+(+45.5mm,+8mm)$);
@@ -182,14 +185,14 @@ We want to enable users to interactively explore correlations in time-varying so
 This data should be depicted not only for a specific point in time but over time as well.
 
 For example, the time dimension can be incorporated by distributing multiple maps spatially using small multiples~\citep{scheibel2016-smallmultiples,chen2017-pesticide}.
-Provided the evolution over more than just two states is already analyzed and available by means of trend data, natural metaphors such as physical-based material degradation or shininess can be an effective tool for communication~\citep{wurfel2016-naturalphenomena}.
+Provided the evolution over more than just two states is already analyzed and available by means of trend data, natural metaphors such as physically based material degradation or shininess can be an effective tool for communication~\citep{wurfel2016-naturalphenomena}.
 Another goal is to augment height and color mappings already in use and rely on the user's existing understanding of treemaps while emphasizing changes in the data.
 Thereby, the representation of change should visually correspond to the change in data (\emph{visual-data-correspondence})~\citep{kindlmann2014-algebraic}.
 This holds for both the actual difference between two values and the direction of change (or sign of the difference).
 For this, basic variants of \emph{data vases}~\citep{thakur2009-datavases} or \emph{in-situ templates}~\citep{limberger2019-insitu} can be used.
 The latter allows for change encoding of up to three visual variables, i.e., area, color, and height, simultaneously.
 However, reading direction issues must be considered, and ample training is required, too.
-An example for the use of in-situ templates to display changes in height is given in~\autoref{fig:static-display}.
+An example of the usage of in-situ templates to display changes in height is given in~\autoref{fig:static-display}.
 
 These approaches, however, handle the depiction of change in color by increasing the geometric complexity.
 In contrast, we extend on approaches that encode the change into the existing geometric representation.
@@ -201,7 +204,7 @@ For this weaving, the effectiveness of reconstructing the ratio of colors as a u
 \section{Procedural Texture Patterns}
 For a rectangular 2.5D treemap, a cuboid's top face and lateral faces are typically used for single-value color mapping, which we use to superimpose a second color representing a second value.
 For that, we use the concept of transition-aware texture patterns that are procedurally generated using \emph{procedural textures} in computer graphics~\citep{Quilez13}.
-These texture patterns are applied to the top and lateral faces and allow to show both colors on a cuboid's surface.
+These texture patterns are applied to the top and lateral faces and allow showing both colors on a cuboid's surface.
 Such a pattern maps a distribution of two colors onto a surface without introducing additional colors.
 
 Let $C = [0,1]^3 \subseteq \mathbb{R}^3$ denote the unit cube in the Euclidean space $\mathbb{R}^3$ that is used to provide a local parameterization of a treemap node.
@@ -217,7 +220,7 @@ Furthermore, a pattern $P$ satisfies the following three properties:
     \item $\area(\{P_1 = c_l \}) = \area(S)$, and
     \item  $\forall \lambda_1, \lambda_2 \in [0,1]: \lambda_1 < \lambda_2 \implies \area(\{P_{\lambda_1} = c_{l}\}) \leq \area(\{P_{\lambda_2} = c_{l}\})$,
 \end{enumerate}
-where $\area$ denotes the usual area of surface in $\mathbb{R}^3$ and the set $\{P_{\lambda} = c_{l}\}$ denotes the subset points on $S$, where the pattern takes the value $c_l$.
+where $\area$ denotes the usual area of a surface in $\mathbb{R}^3$ and the set $\{P_{\lambda} = c_{l}\}$ denotes the subset of points on $S$, where the pattern takes the value $c_l$.
 
 As specific examples of such transition-aware texture patterns, we propose seven patterns, namely (1) Pillar, (2) Pyramid, (3) Arrows, (4) Arrows (full), (5) Noise, (6) Dithering, and (7) Squares (\autoref{fig:trans-vars}).
 As the proposed patterns share approaches but also differ in their visual display and characteristics, we propose a set of characteristics to capture their abilities for information encoding.
@@ -236,7 +239,7 @@ The encoding characteristics are as follows:
 \setlength{\maxlabel}{\widthof{$\nabla_{\textrm{Polygonal}}$}+0.5em}
 \begin{description}[itemindent=0mm,labelwidth=0mm,leftmargin=\maxlabel,align=right,itemsep=1mm]
     \item [$\nabla_{\textrm{Monotonic}}$]
-        A pattern is \emph{monotonic} if a point of the surface switches from displaying the former color to the latter color only once. We only propose patterns in the catalog that have this characteristics. Patterns that are not \emph{monotonic} introduce flickering into an animated transition.
+        A pattern is \emph{monotonic} if a point of the surface switches from displaying the former color to the latter color only once. We only propose patterns in the catalog that have this characteristic. Patterns that are not \emph{monotonic} introduce flickering into an animated transition.
     \item [$\nabla_{\textrm{DirStates}}$]
         This characteristic measures whether the two encoded states can be read unambiguously, i.e., discerning the former from the latter state, in a static image or while the animation is paused during a transition.
         Further, this takes different viewpoints of the user as well as potential occlusion of parts of a cuboid into account.
@@ -250,7 +253,7 @@ The encoding characteristics are as follows:
         The ratio of different colors on the top face matches a transition's progress (top view or 2D treemap).
         The top face area scales with the value mapped to weight.
 \end{description}
-The compatability characteristics are as follows:
+The compatibility characteristics are as follows:
 \begin{description}[itemindent=0mm,labelwidth=0mm,leftmargin=\maxlabel,align=right,itemsep=1mm]
     \item [$\nabla_{\textrm{IndHeight}}$]
         The mapping of change difference and change direction does not compromise the height mapping as well as a display of change mapped to height.
@@ -258,7 +261,7 @@ The compatability characteristics are as follows:
         The mapping of change difference and change direction does not compromise the weight mapping as well as a display of change mapped to weight.
     \item [$\nabla_{\textrm{TreeSize}}$]
         The pattern can be easily adjusted for large or very large treemaps.
-        This characteristic holds, if for a range of treemap sizes, the pattern can be read in a meaningful way, i.e., all other characteristics are retained.
+        This characteristic holds if, for a range of treemap sizes, the pattern can be read in a meaningful way, i.e., all other characteristics are retained.
     \item [$\nabla_{\textrm{Polygonal}}$]
         The pattern is suitable to be applied to treemaps with general polygonal shapes.
         This includes that the pattern's visual metaphor upholds and an implementation is identical or similar to the rectangular one.
@@ -332,12 +335,12 @@ As a result, this pattern encodes transition progress on both the lateral faces 
 The Noise pattern uses 3D noise~\citep{Perlin01} and a threshold to partition the surface for the two colors.
 This results in organic-looking surfaces and transition behavior.
 However, a suitable parameterization of the noise with respect to the scaling is challenging.
-We propose approximating the scale factor by the number of nodes in the tree  as this measure loosely corresponds to the share of footprint area one node has in relation to the size of the whole treemap.
+We propose approximating the scale factor by the number of nodes in the tree, as this measure loosely corresponds to the share of footprint area one node has in relation to the size of the whole treemap.
 
 \paragraph{Dithering.}
 The Dithering pattern encodes the transition using a per-fragment dithering pattern.
 Dithering is applied in screen space regardless of the orientation of the cuboid.
-From a perceptional point of view, this results in a visual blending of the two colors~\citep{Ulichney88}---most likely, the medium on which this paper is read will not be able to display the separated colors.
+From a perceptual point of view, this results in a visual blending of the two colors~\citep{Ulichney88}---most likely, the medium on which this paper is read will not be able to display the separated colors.
 However, we assert that only actual colors from a color scheme will be used using dithering.
 
 \paragraph{Squares.}
@@ -353,7 +356,7 @@ This pattern generates the resemblance of arrows of alternating colors.
 The top faces behave similarly to the Pillar pattern.
 In contrast to the Pillar and Pyramid patterns, the arrow direction can encode the direction of change in value, as the arrows can point upwards.
 Likewise, the pattern can be inverted to resemble downward facing arrows.
-These visual cues for the direction of change, however, prevents effective encoding of the direction of the animation.
+These visual cues for the direction of change, however, prevent effective encoding of the direction of the animation.
 An extension to this pattern that includes the top face is presented with the Arrows (full) pattern.
 
 \begin{figure}[tb]
@@ -491,7 +494,7 @@ Next to easing functions for aesthetic and user-experience purposes~\citep{Thoma
 
 \paragraph{Animation.}
 We use animation as the continuous progression over multiple states of a dataset using transitions.
-More important, it is linked to the concept of time and duration.
+More importantly, it is linked to the concept of time and duration.
 The animation between two points in time, e.g., two subsequent revisions for software system data, can range from running all transitions for every node and every visual variable in parallel to a strict sequence.
 The number of changes between two dataset states severely limits the first approach's usability.
 If there are many changes or if the changes are highly scattered, a user will only be able to grasp individual changes during an animation.
@@ -504,7 +507,7 @@ We apply different constraints to the configurations of an animation:
     \item separate animations based on proximity in the treemap.
 \end{itemize}%
 A configured animation from one state of a dataset to another can be handled as follows: a virtual, global time advances, and for each time-step, the per-node transition control values are updated, and the treemap is redrawn. 
-This process ends as soon all transition are completed.
+This process ends as soon as all transitions are completed.
 
 \section{Evaluation}
 \label{sec:evaluation}
@@ -564,7 +567,7 @@ The rendering pipeline can compute a node's corresponding position, extent, and 
         \node[anchor=south east] at (1.0\linewidth, 3\blockheight) { \scriptsize \strut 31 };
     \end{tikzpicture}
     \caption{
-        Illustration of the memory layout of the per-cuboid data. The cell's width corresponds to the memory consumption; the base width corresponds to one float, i.e., $4$\,bytes, and multiples of two, three, and four corresponds to the vector formats vec2, vec3, and vec4, respectively. The memory representation thus consumes 92 bytes per cuboid.
+        Illustration of the memory layout of the per-cuboid data. The cell's width corresponds to the memory consumption; the base width corresponds to one float, i.e., $4$\,bytes, and multiples of two, three, and four correspond to the vector formats vec2, vec3, and vec4, respectively. The memory representation thus consumes 92 bytes per cuboid.
         This per-cuboid data allows representing both a former state and a latter state for area mapping, height mapping, and color mapping. Further, each mapping has an individual delay value for each cuboid to allow fine-grained animation control. The \emph{emphasis} affects the kind of visual emphasis on the node, e.g., outlines or highlighting fill color.
         The pattern indicates the per-cuboid data that was added to support animated transitions.
         The per-cuboid data for a static display consumes 48 bytes.}
@@ -664,7 +667,7 @@ The rendering pipeline can compute a node's corresponding position, extent, and 
     \end{tikzpicture}%
     \vspace{-0.5\baselineskip}
     \caption{
-        Performance analysis on a small treemap and a large treemap example based on the base implementation and the dual-state implementation, as well as an additional measure for the dual-state implementation during an active animation. The system for the measurements was a Ryzen 5 1600X CPU with 16GB RAM and an Nvidia GTX 1060 GPU with 6GB VRAM. The target resolution for rendering was FullHD (1080$\times$1920 pixels). Each measure is the average of 32\,000 frame renderings.
+        Performance analysis on a small treemap and a large treemap example based on the base implementation and the dual-state implementation, as well as an additional measure for the dual-state implementation during an active animation. The system for the measurements was a Ryzen 5 1600X CPU with 16\,GB RAM and an Nvidia GTX 1060 GPU with 6\,GB VRAM. The target resolution for rendering was Full HD (1920$\times$1080 pixels). Each measure is the average of 32\,000 frame renderings.
     }
     \label{fig:performanceanalysis}
 \end{figure}
@@ -672,7 +675,7 @@ The rendering pipeline can compute a node's corresponding position, extent, and 
 \paragraph{Pattern Computation.}
 The implementation uses fragment shaders and consists of the actual pattern computation and a blending with the other aspects of the shading~(\autoref{listing:fragment_color_blending}, \autoref{listing:vertical_pattern_implementation}). 
 Implementing the patterns themselves was straightforward and imposed no significant impact on rendering performance (runs on mobile devices for large treemaps up to 100\,000 nodes).
-For desktop machines, the performance impact was around 30\% compared to the base implementation~(\autoref{fig:performanceanalysis}.
+For desktop machines, the performance impact was around 30\% compared to the base implementation~(\autoref{fig:performanceanalysis}).
 The patterns are implemented using \emph{signed distance functions}~\citep{Vivo} and fragment shaders.
 The patterns differ mainly in appearance, granularity, and intended surfaces, but they share a constant run-time overhead.
 
@@ -779,13 +782,13 @@ float calculateColorDistance(in PatternData data, in PatternConfig config) {
     \end{tikzpicture}
     \caption{%
         Software map of an internal software project with above 450\,000 nodes. It is displayed within the middle of an animated transition of two revisions of data.
-        For change display, the \emph{Arrow} pattern is used for increasing values and an inversed \emph{Arrow} pattern is used for decreasing values. 
+        For change display, the \emph{Arrow} pattern is used for increasing values and an inverted \emph{Arrow} pattern is used for decreasing values. 
     }
     \label{fig:large-example}
 \end{figure}
 
 \subsection{Case Study}
-Based on the software prototype, we applied the texture patterns on a software system dataset created from the structure and measured software metrics on the Open Source C++ project \emph{cpplocate}\footnote{Source code hosted on GitHub at \href{https://github.com/cginternals/cpplocate}{https://github.com/cginternals/cpplocate}, which, at the time of measurement, still included \emph{googletest} as an in-source module.}.
+Based on the software prototype, we applied the texture patterns on a software system dataset created from the structure and measured software metrics on the open-source C++ project \emph{cpplocate}\footnote{Source code hosted on GitHub at \href{https://github.com/cginternals/cpplocate}{https://github.com/cginternals/cpplocate}, which, at the time of measurement, still included \emph{googletest} as an in-source module.}.
 The source code was measured for the metrics \emph{lines of code}, \emph{nesting level}, \emph{cyclomatic complexity}, \emph{number of developers}, and \emph{change frequency}.
 For this example, the former state was set to October 27, 2018, while the latter state for analysis was March 2, 2019.
 The used mappings are \emph{lines of code} for area mapping, \emph{cyclomatic complexity} for height mapping, resulting in an abstract volume of implementation for the volume of the cuboid of the treemap, and the \emph{change frequency} for color mapping. 
@@ -797,7 +800,7 @@ The change in the color attribute could be encoded in the procedural texture pat
 In comparison, we also applied the visualization to a closed-source software system dataset with above 450\,000 nodes~(\autoref{fig:large-example}).
 The number of nodes results in a small screen space for average-sized nodes.
 As a result, changes on small and average-sized nodes get overlooked.
-Regarding run-time performance, adding the procedural texture patterns had a noticeable effect~(\autoref{fig:performanceanalysis}). The average frame time dropped below 30 frames per second but still allowed for animated transitions.
+Regarding run-time performance, adding the procedural texture patterns had a noticeable effect~(\autoref{fig:performanceanalysis}). The average frame rate dropped below 30 frames per second but still allowed for animated transitions.
 
 \settowidth{\largestheaderlength}{$\nabla_{\textrm{DirChange}}$}%
 \begin{table}[b]
@@ -840,8 +843,8 @@ Regarding run-time performance, adding the procedural texture patterns had a not
         \bottomrule
     \end{tabularx}
     \caption{
-        Overview of the patterns and their encoding and compatability characteristics. This overview is based on technical limitations on a feature level and poses hard constraints for the use of proposed patterns.
-        There might be additional limitations imposed by user expectations or user experience. The scores $\sum_{\nabla C}$ and $\sum_{\nabla E}$ are the weighted sum of the respective characteristics. A supported characteristic count as $1$, a partially supported characteristic as $0.5$ and an unsupported characteristic as $0$. \\
+        Overview of the patterns and their encoding and compatibility characteristics. This overview is based on technical limitations on a feature level and poses hard constraints for the use of proposed patterns.
+        There might be additional limitations imposed by user expectations or user experience. The scores $\sum_{\nabla C}$ and $\sum_{\nabla E}$ are the weighted sum of the respective characteristics. A supported characteristic counts as $1$, a partially supported characteristic as $0.5$ and an unsupported characteristic as $0$. \\
         Legend: \OK~supported | \PARTIAL~partial support | --~unsupported
     } %
 
@@ -850,34 +853,34 @@ Regarding run-time performance, adding the procedural texture patterns had a not
 
 \subsection{Discussion}
 We applied the texture patterns for mid-scale and large software projects, which is only a small share of application scenarios for treemaps and 2.5D treemaps.
-However, we see the software analytics domain as suitable for our analysis because (1) the number of changes between two revisions is usually small, and (2) it allows to test the scalability of visualization technique approaches towards hundreds of thousands of items.
-As a result, we see the texture patterns are visible for small and mid-sized software projects but get harder to detect for large software projects, even with animated transitions.
+However, we see the software analytics domain as suitable for our analysis because (1) the number of changes between two revisions is usually small, and (2) it allows testing the scalability of visualization technique approaches towards hundreds of thousands of items.
+As a result, we see that texture patterns are visible for small and mid-sized software projects but get harder to detect for large software projects, even with animated transitions.
 Although procedural texture patterns to encode a transition of color is a straightforward approach, integrating with other visual features of a 2.5D treemap remains challenging.
 \paragraph{Pattern Characteristics.}
-Defining a pattern that fulfills all proposed characteristics remains an open task. We proposed seven patterns with different characteristics, but none of them fulfills all of the encoding and capability characteristics~(\autoref{tab:template-characteristics}).
-However, we want to highlight the Arrows (full) pattern that supports most encoding characteristics
-, as seen in the $\sum_{\nabla E}$ score.
+Defining a pattern that fulfills all proposed characteristics remains an open task. We proposed seven patterns with different characteristics, but none of them fulfills all of the encoding and compatibility characteristics~(\autoref{tab:template-characteristics}).
+However, we want to highlight the Arrows (full) pattern that supports most encoding characteristics,
+as seen in the $\sum_{\nabla E}$ score.
 Regarding both encoding and compatibility characteristics unweighted, using the sum of $\sum_{\nabla E}$ and $\sum_{\nabla C}$, the Dithering pattern is the most versatile.
-By design, all of our proposed pattern are monotonic and thus support the $\nabla_{Monotonic}$ characteristic.
-Regarding the $\nabla_{DirStates}$ characteristic, only the Pillar and Pyramid pattern support the direct encoding of the former and latter state through orienting the old value above the new value. Here, an explicit encoding using a secondary pattern allows encoding former and latter states for all other patterns.
-For the $\nabla_{DirChange}$ characteristic, only the Arrow and the Arrow (full) pattern allow encoding the direction of change.
+By design, all of our proposed patterns are monotonic and thus support the $\nabla_{\textrm{Monotonic}}$ characteristic.
+Regarding the $\nabla_{\textrm{DirStates}}$ characteristic, only the Pillar and Pyramid patterns support the direct encoding of the former and latter state through orienting the old value above the new value. Here, an explicit encoding using a secondary pattern allows encoding former and latter states for all other patterns.
+For the $\nabla_{\textrm{DirChange}}$ characteristic, only the Arrow and the Arrow (full) patterns allow encoding the direction of change.
 However, their arrow pattern can encode other increases and decreases, such as change in height, as well.
 For example, the arrow was previously used to encode change in height~\citep{limberger2019-insitu}, as shown in \autoref{fig:static-display}.
 This further highlights the challenges to encode multiple changes in values on one treemap node.
-Almost all patterns support the $\nabla_{RatioLat}$ characteristic.
+Almost all patterns support the $\nabla_{\textrm{RatioLat}}$ characteristic.
 However, the Noise pattern has the disadvantage that designing a noise function that matches the ratio of both colors to the progress value is challenging.
-The $\nabla_{RatioTop}$ characteristic is supported by fewer patterns. With two of them, the Pillar and Arrow patterns, this is not supported as the top face is not part of the transition. 
+The $\nabla_{\textrm{RatioTop}}$ characteristic is supported by fewer patterns. With two of them, the Pillar and Arrow patterns, this is not supported as the top face is not part of the transition. 
 In addition, the Pyramid pattern and the Noise pattern only partially provide this characteristic as the ratio of colors is skewed to the current progress value.
-Almost all proposed patterns support the characteristics regarding independence from the height and weight value changes ($\nabla_{IndHeight}$ and $\nabla_{IndWeight}$).
+Almost all proposed patterns support the characteristics regarding independence from the height and weight value changes ($\nabla_{\textrm{IndHeight}}$ and $\nabla_{\textrm{IndWeight}}$).
 However, regarding height, the Pillar and Pyramid patterns are an exception. For both, the border between the colors depends on the cuboid's height. 
 It thus moves non-linearly when both color and height are animated simultaneously.
-We see the applicability for large treemaps ($\nabla_{TreeSize}$) given with the Pillar, Pyramid, and Dithering patterns. The other patterns are applicable in a general sense but suffer in situations of little screen space.
-The applicability of the patterns for non-rectangular treemaps and general 2.5D visualizations is captured in the $\nabla_{Polygonal}$ characteristic. The support is mixed across the proposed patterns. However, the proposed patterns were designed with rectangular treemaps in mind, but other patterns for non-rectangular extruded shapes can be designed, too.
+We see the applicability for large treemaps ($\nabla_{\textrm{TreeSize}}$) given with the Pillar, Pyramid, and Dithering patterns. The other patterns are applicable in a general sense but suffer in situations of little screen space.
+The applicability of the patterns for non-rectangular treemaps and general 2.5D visualizations is captured in the $\nabla_{\textrm{Polygonal}}$ characteristic. The support is mixed across the proposed patterns. However, the proposed patterns were designed with rectangular treemaps in mind, but other patterns for non-rectangular extruded shapes can be designed, too.
 
 \paragraph{Combination of Patterns.}
 Combining the proposed texture patterns with other visual features is expected and supported.
 However, we expect any combined use to influence the used visual mappings.
-For example, visualizing change in color and another visual variable such as height limit the choice of visual mappings considerably~(\autoref{fig:color-and-height-change}).
+For example, visualizing change in color and another visual variable such as height limits the choice of visual mappings considerably~(\autoref{fig:color-and-height-change}).
 Combining multiple procedural patterns through the secondary pattern may allow distinguishing between former and latter states. However, another color is introduced that conflicts with the applied color scale.
 \begin{figure}[tb]
     \begin{tikzpicture}[spy using outlines={black, rectangle, magnification=2.5, size=48, connect spies, every spy on node/.append style={line width=1.0pt}},inner sep=0pt, outer sep=0pt]
@@ -909,7 +912,7 @@ Combining multiple procedural patterns through the secondary pattern may allow d
 \paragraph{Implementation.}
 Implementing the prototype using hardware-accelerated rendering and procedural texture patterns seems advantageous, as it allows for a broad range of patterns, combinations, and extensions.
 Using a pattern as a starting point is straightforward (see \autoref{fig:extended-examples}).
-The overhead in rendering times is reasonable and allows for interactive frame rates for mid-scale and even large datasets with hundreds and thousands of nodes.
+The overhead in rendering times is reasonable and allows for interactive frame rates for mid-scale and even large datasets with hundreds of thousands of nodes.
 
 \section{Conclusions}
 We have shown that exploring time-varying, tree-structured data using 3D-embedded treemaps is feasible by means of (and in addition to area, height, and color) transitional visual variables.
@@ -920,7 +923,7 @@ For specific templates on how to transition color values in 3D we proposed the s
 We discussed the different characteristics, especially the direction of change in value and the direction of animation, and the strengths and weaknesses of each pattern.
 Due to a pending user evaluation, we cannot conclude a default pattern at this point.
 Further, the proposed texture patterns are currently not fully compatible with other approaches using procedural textures used to encode the direction of change for spatial changes of cuboids.
-The prototype indicates that these procedural texture patterns require little overhead for basic implementations, and interactive framerates are achieved even for large-sized treemaps.
+The prototype indicates that these procedural texture patterns require little overhead for basic implementations, and interactive frame rates are achieved even for large-sized treemaps.
 
 Future work includes quantitative evaluations using comprehensive user studies and extended case studies on large software systems and long periods.
 The goal would be to find one pattern or a small set of patterns that perform best regarding readability.
