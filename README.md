@@ -4,7 +4,7 @@
 
 *Journal of Visualization* 26(2). Springer Nature, 2022, pp. 317–333.
 
-DOI: [10.1007/s12650-022-00874-3](https://doi.org/10.1007/s12650-022-00874-3) (open access, CC BY 4.0)
+DOI: [10.1007/s12650-022-00874-3](https://doi.org/10.1007/s12650-022-00874-3) (open access, CC BY 4.0) · Author's version: [Zenodo](https://doi.org/10.5281/zenodo.24120828)
 
 > Treemaps depict tree-structured data while maintaining flexibility in mapping data to different visual variables.
 > This work explores how changes in data mapped to color can be represented with rectangular 2.5D treemaps using procedural texture patterns.
